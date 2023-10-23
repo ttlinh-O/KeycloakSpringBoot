@@ -1,0 +1,43 @@
+spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          keycloak:
+            client-id: admin-client
+            client-secret: 74bPMRJI4dBTe8yiIWIQrDljFCLsy1wg
+            scope: openid
+            authorization-grant_type: password
+        provider:
+          keycloak:
+            issuer-uri: http://localhost:8001/realms/admin-realm
+            user-name-attribute: preferred_username
+      resource-server:
+        jwt:
+          issuer-uri: http://localhost:8001/realms/admin-realm
+          jwt-set-uri: ${spring.security.oauth2.resource-server.jwt.issuer-uri}/protocol/openid-connect/certs
+
+server:
+  port: 8081
+
+
+
+
+security:
+  authz:
+    role-hierarchy:
+      # ROLE_ADMIN is provided by Keycloak
+      ROLE_ADMIN: ROLE_USER_ADMIN, ROLE_ORDER_ADMIN
+      ROLE_ORDER_ADMIN: ROLE_ORDER_DISPATCHER
+      # ROLE_ORDER_DISPATCHER is internally assigned to user with name "demo"
+      ROLE_ORDER_DISPATCHER: ROLE_USER
+      ROLE_USER_ADMIN: ROLE_USER
+      # ROLE_USER is provided by Keycloak
+      ROLE_USER: ROLE_API_CONSUMER
+      ROLE_API_CONSUMER: ROLE_AUTHENTICATED
+      ROLE_AUTHENTICATED: ROLE_UNAUTHENTICATED
+
+    # maps roles to internal permissions
+    permissions:
+      ROLE_ORDER_DISPATCHER: ['create-order', 'cancel-order']
+      ROLE_ORDER_ADMIN: ['delete-order']
